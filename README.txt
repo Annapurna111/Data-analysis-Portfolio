@@ -9,3 +9,5 @@ Analyzing 3 years of order details.
 7) Queried to identify top loyal and high value customers.
 
 The data has been collected and published with consent of the data owner. However the business name has been changed for anonimity purposes.
+Please find the raw files and exported R markdown reports in the below link:
+https://drive.google.com/file/d/1R50-vZmglHfVXaHx46n3TB13nSMO-qlj/view?usp=drive_link

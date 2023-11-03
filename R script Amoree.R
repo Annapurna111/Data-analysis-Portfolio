@@ -497,13 +497,8 @@ ggplot(Amoree2023_v2)+ geom_col(mapping=aes(x=Category,y=Price),fill="darkblue")
 ggplot(Amoree2023_v2)+ geom_col(mapping=aes(x=Category,y=Profit),fill="blue") +
   labs(title="Profit per Category 2023")
 
-
-
-
-
-
-                                       ############# END ###############
-
+### Export the cleaned data to query on SQL - SSMS 
+  
 write_csv(
   Amoree2021_v2,"Amoree Sales 2022 Cleaned.csv",
   append = FALSE,
@@ -524,6 +519,12 @@ write_csv(
   na="NA",
   path="C:\\Users\\91914\\Documents\\Data analysys\\Project Amoree Gifting\\Amoree Sales Cleaned.csv"
 )
+
+
+
+                                       ############# END ###############
+
+
 
 ### TEST AREA
 

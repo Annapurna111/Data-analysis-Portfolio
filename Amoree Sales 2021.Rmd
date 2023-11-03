@@ -1,0 +1,208 @@
+---
+title: "Amoree Sales Data analysis"
+output:
+  pdf_document: default
+  html_document: default
+date: "2023-11-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R Markdown for 2021 Amoree Sales data analysis
+
+This is an R Markdown document.
+
+### Install basic packages
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(readxl)
+library(dplyr) 
+library(tibble)  
+```
+
+
+### Import 2021 data from excel file
+ 
+
+
+```{r}
+Amoree2021 <- read_excel("C:\\Users\\91914\\Documents\\Data analysys\\Project Amoree Gifting\\Amoree Gifting Sales.xlsx",sheet = "2021")
+head(Amoree2021)
+
+
+Amoree2021 <- data.frame(Amoree2021)
+```
+
+### Rename columns  
+  
+
+
+```{r}
+Amoree2021_v2 <- Amoree2021 %>% 
+  rename(Sl_No=Sl.No.,Customer=Client.Name.,Price=Sale.Price...,Date=Delivery.Date.,
+         Expense=Cost.Incurred..., Profit=Profit.Amount....) 
+```
+
+
+### Categorize products based on Product type and quantity  
+  
+
+
+```{r}
+Amoree2021_v2 <- add_column(Amoree2021_v2, Category=NA)
+
+for (i in 1:nrow(Amoree2021_v2)) 
+{
+  if(str_detect(Amoree2021_v2[i,3], ("Birthday")) == TRUE)
+  {
+    Amoree2021_v2[i,"Category"]="Birthday"
+    
+  }
+  else
+    
+    if(str_detect(Amoree2021_v2[i,3],("Monogram")) == TRUE)
+    {
+      
+      Amoree2021_v2[i,"Category"]="Monogram"
+    }
+  
+  else
+    
+    if(str_detect(Amoree2021_v2[i,3],("Frame")) == TRUE)
+    {
+      
+      Amoree2021_v2[i,"Category"]="Frames"
+      
+    }
+  
+  else
+    
+  {
+    Amoree2021_v2[i,"Category"]="Others"
+  }
+  
+}
+
+
+
+for(i in 1:nrow(Amoree2021_v2))
+if((str_detect(Amoree2021_v2[i,3],("Liquor"))) | (str_detect(Amoree2021_v2[i,3],("Men"))) | (str_detect(Amoree2021_v2[i,3],("Alcohol")))  == TRUE)
+{
+  
+  Amoree2021_v2[i,"Category"]="Men's hampers"
+  
+}
+
+  
+
+for(i in 1:nrow(Amoree2021_v2))
+{
+  if(Amoree2021_v2[i,6]>5)
+    Amoree2021_v2[i,"Category"]="Return gifts/Bulk)"
+  
+}
+
+```
+
+  
+    
+    
+### Get a glimpse of the data frame structure  
+  
+  
+
+```{r}
+glimpse(Amoree2021_v2)
+```
+
+  
+  
+
+### Change the data types to appropriate data types according to the column names.  
+### Also split Date into months and years for convenience.  
+  
+  
+
+```{r}
+Amoree2021_v2 <- transform(Amoree2021_v2,Price = as.numeric(Price),Expense = as.numeric(Expense),Date=dmy(Date))
+
+Amoree2021_v2 <- Amoree2021_v2 %>% mutate(Month=month(Date)) %>%
+  mutate(Year=year(Date)) %>% arrange(Month)
+```
+
+  
+    
+    
+### Profit analysis calculations  
+  
+  
+
+```{r}
+
+Rev_2021 <- Amoree2021_v2 %>% group_by(Month) %>%  summarise(Revenue = sum(Price,na.rm=TRUE),
+                                                             Cost = sum(Expense,na.rm=TRUE),
+                                                             Profit = sum(Profit,na.rm=TRUE))
+
+Profit_analysis_2021 <- Amoree2021_v2  %>% 
+  select(Product,Qty,Profit,Price,Category) %>% mutate(Profit_per_item=Profit/Qty) %>% 
+  group_by(Category) %>% 
+  summarise(Avg_profit_peritem=mean(Profit_per_item, na.rm = TRUE))
+View(Profit_analysis_2021)
+
+Revenue_per_category_2021 <- Amoree2021_v2 %>% 
+  select(Product,Qty,Profit,Price,Category) %>% group_by(Category) %>% 
+  summarise(Revenue_per_category=sum(Price,na.rm=TRUE),
+            Total_qty_per_category=sum(Qty,na.rm=TRUE))
+
+Profit_per_category_2021 <- Amoree2021_v2  %>% 
+  select(Product,Qty,Profit,Price,Category) %>% group_by(Category) %>% 
+  summarise(Profit_per_category=sum(Profit,na.rm=TRUE))
+
+ ###### Final Profit analysis
+
+Profit_percentage_per_category_2021 <- Profit_per_category_2021 %>%
+  mutate(Revenue_per_category=Revenue_per_category_2021$Revenue_per_category,
+         Qty=Revenue_per_category_2021$Total_qty_per_category) %>% 
+  mutate(Avg_price_per_category=Revenue_per_category/Qty,
+         Profit_percent_per_category=(Profit_per_category/Revenue_per_category)*100)
+
+
+head(Profit_percentage_per_category_2021)
+
+```
+
+  
+    
+    
+## Plots
+  
+    
+    
+
+
+```{r , echo=FALSE}
+
+ggplot(Amoree2021_v2)+ geom_bar(mapping=aes(x=Category))+ 
+  labs(title="Number of orders by Category 2021") 
+
+ggplot(Rev_2021,aes(x=Month,y=Revenue)) + geom_point() + geom_line() +
+  scale_x_continuous(breaks=seq(0,12, by=1)) +
+  labs(title = "Revenue by months 2021",y="Revenue")
+
+ggplot(Amoree2021_v2,aes(x=Month,y=Profit,fill=Category)) + 
+  geom_col() + scale_x_continuous(breaks=seq(0,12.5,by=1)) +
+  labs(title = "Profit by months 2021")
+
+ggplot(Amoree2021_v2)+ geom_col(mapping=aes(x=Category,y=Price),fill="darkblue")+
+  labs(title="Revenue per Category 2021",y="Revenue") 
+
+ggplot(Amoree2021_v2)+ geom_col(mapping=aes(x=Category,y=Profit),fill="blue") +
+  labs(title="Profit per Category 2021")
+
+```
+
+

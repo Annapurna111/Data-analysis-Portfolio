@@ -1,0 +1,47 @@
+--Imported file from import flat file option into new table--
+
+
+SELECT * From dbo.OrderDetails;
+
+
+
+--Revenue details by Year--
+
+SELECT
+		Year,
+		SUM(Price) AS Revenue$,
+		SUM(Expense) AS Cost$,
+		 SUM(Profit) AS Profit$
+		   FROM dbo.Orderdetails
+		   GROUP BY(Year);
+
+
+
+--Total Revenue details--
+
+SELECT
+		SUM(Price) AS Revenue$,
+		SUM(Expense) AS Cost$,
+		 SUM(Profit) AS Profit$
+		   FROM dbo.Orderdetails;
+
+
+
+--Top  loyal customers--
+
+SELECT Customer, COUNT(Customer) AS Orders
+			FROM dbo.orderdetails
+			GROUP BY Customer
+			HAVING COUNT(Customer) > 1
+			ORDER BY Orders DESC;
+
+
+
+--Highest value Customers--
+
+
+SELECT TOP 10 Customer, SUM(Expense) as RevenueImpact$
+			FROM dbo.orderdetails
+			GROUP BY Customer
+			ORDER BY RevenueImpact$ DESC;
+			

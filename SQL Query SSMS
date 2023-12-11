@@ -1,9 +1,6 @@
 --Imported file from import flat file option into new table--
 
-
 SELECT * From dbo.OrderDetails;
-
-
 
 --Revenue details by Year--
 
